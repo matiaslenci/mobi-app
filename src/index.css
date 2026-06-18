@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-canvas text-ink font-sans antialiased;
+    font-feature-settings: 'ss01', 'cv11';
+  }
+
+  /* Tighter tracking on headings, in line with the design system. */
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply tracking-tight;
+    font-weight: 600;
+  }
+
+  /* Quiet, native-feeling focus rings consistent with the calm palette. */
+  *:focus-visible {
+    outline: 2px solid #181811;
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  ::selection {
+    background: #181811;
+    color: #f4f4f0;
+  }
+}
