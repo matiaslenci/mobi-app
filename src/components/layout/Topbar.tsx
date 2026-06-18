@@ -1,31 +1,24 @@
 import { useEffect, useRef, useState } from 'react'
-import { Check, ChevronsUpDown, CircleHelp, PanelLeft, Search } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { CircleHelp, LogOut, PanelLeft, Search } from 'lucide-react'
 import { Avatar } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+import { supabase } from '@/lib/supabase'
+import { useAuthStore } from '@/store/authStore'
 
 interface TopbarProps {
   onToggleSidebar: () => void
 }
 
-interface Inmobiliaria {
-  id: string
-  nombre: string
-  plan: 'Mobi' | 'Free'
-}
-
-const INMOBILIARIAS: Inmobiliaria[] = [
-  { id: 'i1', nombre: 'Bravo Propiedades', plan: 'Mobi' },
-  { id: 'i2', nombre: 'Sur Inmobiliaria', plan: 'Free' },
-  { id: 'i3', nombre: 'Plaza Real Estate', plan: 'Mobi' },
-]
-
 export function Topbar({ onToggleSidebar }: TopbarProps) {
+  const navigate = useNavigate()
+  const { usuario, inmobiliaria } = useAuthStore()
+
   const [open, setOpen] = useState(false)
-  const [active, setActive] = useState<Inmobiliaria>(INMOBILIARIAS[0])
   const ref = useRef<HTMLDivElement>(null)
 
+  // Cerrar dropdown al hacer click afuera
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
       if (!ref.current?.contains(e.target as Node)) setOpen(false)
@@ -33,6 +26,15 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
     document.addEventListener('mousedown', onClick)
     return () => document.removeEventListener('mousedown', onClick)
   }, [])
+
+  const initials = usuario
+    ? `${usuario.nombre.charAt(0)}${usuario.apellido.charAt(0)}`.toUpperCase()
+    : '?'
+
+  async function handleLogout() {
+    await supabase.auth.signOut()
+    navigate('/login')
+  }
 
   return (
     <header className="sticky top-0 z-20 border-b border-line bg-canvas">
@@ -46,54 +48,20 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
           <PanelLeft className="h-4 w-4" strokeWidth={1.75} />
         </button>
 
-        <div className="relative" ref={ref}>
-          <button
-            type="button"
-            onClick={() => setOpen((v) => !v)}
-            className={cn(
-              'flex items-center gap-2 rounded-md border border-line bg-canvas pl-3 pr-2 py-1.5 text-[13px]',
-              'hover:bg-surface transition-colors',
-            )}
-          >
-            <span className="font-medium text-ink">{active.nombre}</span>
-            <Badge tone={active.plan === 'Mobi' ? 'ink' : 'outline'}>{active.plan}</Badge>
-            <ChevronsUpDown className="h-3.5 w-3.5 text-ink-muted" strokeWidth={1.75} />
-          </button>
-
-          {open && (
-            <div className="absolute left-0 top-[calc(100%+6px)] z-30 w-72 rounded-lg border border-line bg-canvas shadow-float">
-              <div className="px-3 py-2 text-label-sm text-ink-muted">Inmobiliarias</div>
-              <ul className="px-1 pb-1">
-                {INMOBILIARIAS.map((i) => {
-                  const selected = i.id === active.id
-                  return (
-                    <li key={i.id}>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setActive(i)
-                          setOpen(false)
-                        }}
-                        className={cn(
-                          'flex w-full items-center justify-between gap-2 rounded-md px-2.5 py-2 text-[13px] transition-colors',
-                          selected ? 'bg-surface text-ink' : 'text-ink-secondary hover:bg-surface/70 hover:text-ink',
-                        )}
-                      >
-                        <span className="flex items-center gap-2">
-                          <span className="font-medium">{i.nombre}</span>
-                          <Badge tone={i.plan === 'Mobi' ? 'ink' : 'outline'}>{i.plan}</Badge>
-                        </span>
-                        {selected && <Check className="h-3.5 w-3.5 text-ink" strokeWidth={2} />}
-                      </button>
-                    </li>
-                  )
-                })}
-              </ul>
-            </div>
+        {/* Inmobiliaria actual (estático, sin switcher) */}
+        <div className="flex items-center gap-2 rounded-md border border-line bg-canvas pl-3 pr-2 py-1.5 text-[13px]">
+          <span className="font-medium text-ink">
+            {inmobiliaria?.nombre ?? 'Sin inmobiliaria'}
+          </span>
+          {inmobiliaria && (
+            <Badge tone={inmobiliaria.plan === 'mobi' ? 'ink' : 'outline'}>
+              {inmobiliaria.plan === 'mobi' ? 'Mobi' : 'Free'}
+            </Badge>
           )}
         </div>
 
         <div className="ml-auto flex items-center gap-2">
+          {/* Barra de búsqueda */}
           <div className="hidden sm:flex items-center gap-2 rounded-lg border border-line bg-canvas pl-3 pr-2 h-9 w-72 text-[13px] text-ink-muted">
             <Search className="h-4 w-4" strokeWidth={1.75} />
             <input
@@ -106,12 +74,45 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
             </kbd>
           </div>
 
+          {/* Ayuda */}
           <Button variant="ghost" size="sm" className="gap-1.5">
             <CircleHelp className="h-4 w-4" strokeWidth={1.75} />
             <span className="hidden sm:inline">Ayuda</span>
           </Button>
 
-          <Avatar initials="MR" />
+          {/* Avatar con dropdown de usuario */}
+          <div className="relative" ref={ref}>
+            <button
+              type="button"
+              onClick={() => setOpen((v) => !v)}
+              className="focus:outline-none"
+            >
+              <Avatar initials={initials} />
+            </button>
+
+            {open && (
+              <div className="absolute right-0 top-[calc(100%+6px)] z-30 w-64 rounded-lg border border-line bg-canvas shadow-float">
+                <div className="px-4 py-3">
+                  <p className="text-body-sm font-medium text-ink">
+                    {usuario ? `${usuario.nombre} ${usuario.apellido}` : '—'}
+                  </p>
+                  <p className="text-label-sm text-ink-muted mt-0.5">
+                    {usuario?.email ?? '—'}
+                  </p>
+                </div>
+                <div className="border-t border-line px-1 py-1">
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-[13px] text-ink-secondary hover:bg-surface hover:text-ink transition-colors"
+                  >
+                    <LogOut className="h-4 w-4" strokeWidth={1.75} />
+                    <span>Cerrar sesión</span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>

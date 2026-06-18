@@ -1,10 +1,17 @@
 import { useState } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet, Navigate } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
 import { Topbar } from './Topbar'
+import { useAuthStore } from '@/store/authStore'
 
 export function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const { membresia, usuario } = useAuthStore()
+
+  // Si el usuario no tiene membresía activa, redirigir al onboarding
+  if (usuario && !membresia) {
+    return <Navigate to="/onboarding" replace />
+  }
 
   return (
     <div className="min-h-screen bg-canvas">
