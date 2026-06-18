@@ -1,12 +1,12 @@
-import { NavLink } from 'react-router-dom'
-import { Plus, Settings, Sparkles, X } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { sections } from '@/lib/sections'
-import { cn } from '@/lib/utils'
+import { NavLink } from "react-router-dom";
+import { Plus, Settings, Sparkles, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { sections } from "@/lib/sections";
+import { cn } from "@/lib/utils";
 
 interface SidebarProps {
-  open: boolean
-  onClose: () => void
+  open: boolean;
+  onClose: () => void;
 }
 
 export function Sidebar({ open, onClose }: SidebarProps) {
@@ -22,9 +22,9 @@ export function Sidebar({ open, onClose }: SidebarProps) {
 
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-line bg-canvas',
-          'transition-transform duration-200 ease-out lg:translate-x-0',
-          open ? 'translate-x-0' : '-translate-x-full',
+          "fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-line bg-canvas",
+          "transition-transform duration-200 ease-out lg:translate-x-0",
+          open ? "translate-x-0" : "-translate-x-full",
         )}
       >
         <div className="flex items-center justify-between px-5 pt-5 pb-4">
@@ -32,7 +32,9 @@ export function Sidebar({ open, onClose }: SidebarProps) {
             <div className="grid h-7 w-7 place-items-center rounded-md bg-primary text-primary-foreground text-[13px] font-semibold">
               m
             </div>
-            <span className="text-[15px] font-semibold tracking-tight">Mobi</span>
+            <span className="text-[15px] font-semibold tracking-tight">
+              Mobi
+            </span>
           </div>
           <button
             type="button"
@@ -46,27 +48,27 @@ export function Sidebar({ open, onClose }: SidebarProps) {
 
         <div className="px-3 pb-3">
           <Button variant="primary" className="w-full justify-center gap-2">
-            <Plus className="h-4 w-4" strokeWidth={2} />
-            Nueva propiedad
+            <Plus className="h-4 w-4 text-white " strokeWidth={2} />
+            <p className="text-white"> Nueva propiedad</p>
           </Button>
         </div>
 
         <nav className="flex-1 overflow-y-auto px-2">
           <ul className="space-y-0.5">
             {sections.map((section) => {
-              const Icon = section.icon
+              const Icon = section.icon;
               return (
                 <li key={section.slug}>
                   <NavLink
                     to={section.path}
-                    end={section.path === '/'}
+                    end={section.path === "/"}
                     onClick={onClose}
                     className={({ isActive }) =>
                       cn(
-                        'flex items-center gap-2.5 rounded-md px-3 py-2 text-nav transition-colors',
+                        "flex items-center gap-2.5 rounded-md px-3 py-2 text-nav transition-colors",
                         isActive
-                          ? 'bg-surface text-ink font-medium'
-                          : 'text-ink-secondary hover:bg-surface/60 hover:text-ink',
+                          ? "bg-surface text-ink font-medium"
+                          : "text-ink-secondary hover:bg-surface/60 hover:text-ink",
                       )
                     }
                   >
@@ -74,7 +76,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
                     <span>{section.label}</span>
                   </NavLink>
                 </li>
-              )
+              );
             })}
           </ul>
         </nav>
@@ -97,10 +99,10 @@ export function Sidebar({ open, onClose }: SidebarProps) {
             to="/configuracion"
             className={({ isActive }) =>
               cn(
-                'flex items-center gap-2.5 rounded-md px-3 py-2 text-nav transition-colors',
+                "flex items-center gap-2.5 rounded-md px-3 py-2 text-nav transition-colors",
                 isActive
-                  ? 'bg-surface text-ink font-medium'
-                  : 'text-ink-secondary hover:bg-surface/60 hover:text-ink',
+                  ? "bg-surface text-ink font-medium"
+                  : "text-ink-secondary hover:bg-surface/60 hover:text-ink",
               )
             }
           >
@@ -110,5 +112,5 @@ export function Sidebar({ open, onClose }: SidebarProps) {
         </div>
       </aside>
     </>
-  )
+  );
 }
